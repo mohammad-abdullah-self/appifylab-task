@@ -33,7 +33,18 @@ Copy the example environment file:
 cp .env.example .env
 ```
 
-# 📦 4. Install Dependencies and Start the Development Server
+# 🗄️ 4. Setup Neon Database Connection
+
+This project uses Neon (serverless PostgreSQL). Follow these steps:
+
+Go to [Neon](https://neon.com/) and create a new project.
+
+In the Neon dashboard, get your connection string. It should look like:
+```sh
+postgresql://<username>:<password>@<host>/<database>?options...
+```
+
+# 📦 5. Install Dependencies and Start the Development Server
 
 Install all project dependencies and Run the project in development mode:
 
@@ -43,8 +54,6 @@ bun run db:generate
 bun run db:migrate
 bun dev
 ```
-
-
 
 # Project Discussion
 

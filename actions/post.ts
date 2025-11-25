@@ -13,10 +13,14 @@ import {
 import { verifySession } from "@/app/lib/dal";
 import { writeFile } from "fs/promises";
 import path from "path";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, desc, isNull, or, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import * as z from "zod";
 import { promises as fs } from "fs";
+import { LikeType } from "@/types/likeType";
+import { CommentsType } from "@/types/commentType";
+import { UserType } from "@/types/userType";
+import { PostType } from "@/types/postType";
 
 export async function createPostAction(
   state: CreatePostState,
@@ -67,35 +71,35 @@ export async function getPostsAction() {
   if (!session?.userId) throw new Error("Not authenticated");
 
   const posts = await db.query.Posts.findMany({
-    where: (posts, { eq, or, and }) =>
+    where: (posts) =>
       or(
         eq(posts.isPrivate, false),
         and(eq(posts.isPrivate, true), eq(posts.authorId, session.userId))
       ),
-    orderBy: (posts, { desc }) => [desc(posts.createdAt)],
+    orderBy: (posts) => [desc(posts.createdAt)],
     with: {
       author: true,
       likes: {
-        orderBy: (likes, { desc }) => [desc(likes.createdAt)],
+        orderBy: (likes) => [desc(likes.createdAt)],
         with: {
           user: true,
         },
       },
       comments: {
-        where: (comments, { isNull }) => isNull(comments.parentId),
-        orderBy: (comments, { desc }) => [desc(comments.createdAt)],
+        where: (comments) => isNull(comments.parentId),
+        orderBy: (comments) => [desc(comments.createdAt)],
         with: {
           author: true,
           likes: {
-            orderBy: (likes, { desc }) => [desc(likes.createdAt)],
+            orderBy: (likes: typeof Likes) => [desc(likes.createdAt)],
             with: { user: true },
           },
           replies: {
-            orderBy: (replies, { desc }) => [desc(replies.createdAt)],
+            orderBy: (replies: typeof Comments) => [desc(replies.createdAt)],
             with: {
               author: true,
               likes: {
-                orderBy: (likes, { desc }) => [desc(likes.createdAt)],
+                orderBy: (likes: typeof Likes) => [desc(likes.createdAt)],
                 with: { user: true },
               },
             },
@@ -105,10 +109,7 @@ export async function getPostsAction() {
     },
   });
 
-  function fullName(user: {
-    firstName?: string | null;
-    lastName?: string | null;
-  }) {
+  function fullName(user: UserType): string {
     const fn = (user?.firstName ?? "").trim();
     const ln = (user?.lastName ?? "").trim();
     return fn || ln ? `${fn}${fn && ln ? " " : ""}${ln}` : "Unknown";

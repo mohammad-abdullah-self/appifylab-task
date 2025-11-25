@@ -34,6 +34,21 @@ export default async function proxy(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", req.nextUrl));
   }
 
+  const publicPaths = [
+    "/uploads", // <- public uploads folder
+    "/favicon.ico",
+    "/logo-copy.svg",
+  ];
+
+  // skip middleware for public paths or static files
+  if (
+    publicPaths.some((p) => req.nextUrl.pathname.startsWith(p)) ||
+    req.nextUrl.pathname.startsWith("/_next") ||
+    req.nextUrl.pathname.match(/\.(png|jpg|jpeg|gif|svg|webp)$/)
+  ) {
+    return NextResponse.next();
+  }
+
   return NextResponse.next();
 }
 

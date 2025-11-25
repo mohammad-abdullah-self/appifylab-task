@@ -1,7 +1,7 @@
 export type UserType = {
   id: number;
   firstName: string;
-  lastName: boolean;
+  lastName: string;
   password: string;
   createdAt: Date;
   updatedAt: Date;

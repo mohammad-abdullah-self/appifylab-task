@@ -9,8 +9,6 @@ interface Props {
 }
 
 const Feeds: FC<Props> = ({ posts }) => {
-  console.log("posts", posts);
-
   return (
     <>
       {posts.map((post) => (

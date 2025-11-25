@@ -2,9 +2,10 @@ import { getAuthUserFullName, logoutAction } from "@/actions/auth";
 import { getPostsAction } from "@/actions/post";
 import CreateFeedForm from "@/app/ui/feed/create-feed-form";
 import Feeds from "@/app/ui/feed/feeds";
+import { PostType } from "@/types/postType";
 
 export default async function Page() {
-  const data = await getPostsAction();
+  const data: PostType[] = await getPostsAction();
   const authUserFullName = await getAuthUserFullName();
 
   return (
@@ -861,7 +862,7 @@ export default async function Page() {
                     <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                       <div className="_header_mobile_menu_top_inner">
                         <div className="_header_mobile_menu_logo">
-                          <a href="feed.html" clas="_mobile_logo_link">
+                          <a href="feed.html" className="_mobile_logo_link">
                             <img
                               src="assets/images/logo.svg"
                               alt="Image"

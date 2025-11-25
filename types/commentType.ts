@@ -1,3 +1,4 @@
+import { LikeType } from "./likeType";
 import { AuthorType } from "./userType";
 
 export type CommentsType = {
@@ -10,5 +11,6 @@ export type CommentsType = {
   updatedAt: Date;
   likesNames: string[];
   author: AuthorType;
+  likes: LikeType[];
   replies: CommentsType[];
 };
