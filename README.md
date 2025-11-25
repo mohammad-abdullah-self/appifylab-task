@@ -39,5 +39,13 @@ Install all project dependencies and Run the project in development mode:
 
 ```sh
 bun install
+bun run db:generate
+bun run db:migrate
 bun dev
 ```
+
+
+
+# Project Discussion
+
+This project is a full-stack social media application built with Next.js for both frontend and backend using Server Actions for seamless API handling. The database is powered by PostgreSQL (hosted on Neon) and accessed via Drizzle ORM, enabling type-safe queries and easy relational mapping. Bun is used as the runtime for faster builds and development. The system supports users, posts, nested comments, and likes, with careful relational design to ensure data integrity and efficient queries. The unified likes table and self-referencing comments allow scalable interactions, while timestamps track creation and updates for posts, comments, and likes.
