@@ -6,3 +6,5 @@ export type UserType = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+export type AuthorType = UserType;

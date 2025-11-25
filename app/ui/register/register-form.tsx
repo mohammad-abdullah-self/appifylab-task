@@ -1,10 +1,11 @@
 "use client";
 
-import { register } from "@/actions/auth";
+import { registerAction } from "@/actions/auth";
 import { useActionState } from "react";
+import ValidationError from "@/app/ui/validation/validation-error";
 
 export default function RegisterForm() {
-  const [state, action, pending] = useActionState(register, undefined);
+  const [state, action, pending] = useActionState(registerAction, false);
 
   return (
     <form action={action} className="_social_registration_form">
@@ -24,7 +25,7 @@ export default function RegisterForm() {
               className="form-control _social_registration_input"
             />
           </div>
-          {state?.errors?.firstName && <p>{state.errors.firstName}</p>}
+          <ValidationError message={state?.errors?.firstName} />
         </div>
 
         <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
@@ -42,7 +43,7 @@ export default function RegisterForm() {
               className="form-control _social_registration_input"
             />
           </div>
-          {state?.errors?.lastName && <p>{state.errors.lastName}</p>}
+          <ValidationError message={state?.errors?.lastName} />
         </div>
 
         <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
@@ -60,7 +61,7 @@ export default function RegisterForm() {
               className="form-control _social_registration_input"
             />
           </div>
-          {state?.errors?.email && <p>{state.errors.email}</p>}
+          <ValidationError message={state?.errors?.email} />
         </div>
 
         <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
@@ -78,16 +79,7 @@ export default function RegisterForm() {
               className="form-control _social_registration_input"
             />
           </div>
-          {state?.errors?.password && (
-            <div>
-              <p>Password must:</p>
-              <ul>
-                {state.errors.password.map((error) => (
-                  <li key={error}>- {error}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+          <ValidationError message={state?.errors?.password} />
         </div>
         {/* end form row*/}
       </div>

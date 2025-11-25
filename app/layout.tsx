@@ -30,7 +30,7 @@ export default function RootLayout({
         {children}
         <Script src="/assets/js/bootstrap.bundle.min.js" />
         <Script src="/assets/js/custom.js" />
-        <Script id="show-notifyDropdown">
+        <Script id="show-notifyDropdown" strategy="afterInteractive">
           {`
             var notifyDropdown = document.querySelector("#_notify_drop");
             var notifyDropShowBtn = document.querySelector("#_notify_btn");

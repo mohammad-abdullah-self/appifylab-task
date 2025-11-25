@@ -1,10 +1,11 @@
 "use client";
 
-import { login } from "@/actions/auth";
+import { loginAction } from "@/actions/auth";
 import { useActionState } from "react";
+import ValidationError from "../validation/validation-error";
 
 export default function RegisterForm() {
-  const [state, action, pending] = useActionState(login, undefined);
+  const [state, action, pending] = useActionState(loginAction, false);
 
   return (
     <form action={action} className="_social_login_form">
@@ -21,7 +22,7 @@ export default function RegisterForm() {
               className="form-control _social_login_input"
             />
           </div>
-          {state?.errors?.email && <p>{state.errors.email}</p>}
+          <ValidationError message={state?.errors?.email} />
         </div>
 
         <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
@@ -36,7 +37,7 @@ export default function RegisterForm() {
               className="form-control _social_login_input"
             />
           </div>
-          {state?.errors?.password && <p>{state.errors.password}</p>}
+          <ValidationError message={state?.errors?.password} />
         </div>
       </div>
 

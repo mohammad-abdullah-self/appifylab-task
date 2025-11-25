@@ -1,22 +1,22 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "@/db/drizzle";
-import { users } from "@/db/schema";
+import { Users } from "@/db/schema";
 import bcrypt from "bcrypt";
 import {
   LoginFormSchema,
   LoginState,
   RegisterFormSchema,
-  FormState,
+  RegisterState,
 } from "@/app/lib/definitions";
 import { createSession } from "@/app/lib/session";
 import { deleteSession } from "@/app/lib/session";
 import { redirect } from "next/navigation";
 import * as z from "zod";
+import { verifySession } from "@/app/lib/dal";
 
-export async function register(state: FormState, formData: FormData) {
-  // Validate form fields
+export async function registerAction(state: RegisterState, formData: FormData) {
   const validatedFields = RegisterFormSchema.safeParse({
     firstName: formData.get("first_name"),
     lastName: formData.get("last_name"),
@@ -24,31 +24,25 @@ export async function register(state: FormState, formData: FormData) {
     password: formData.get("password"),
   });
 
-  // If any form fields are invalid, return early
   if (!validatedFields.success) {
     return {
       errors: z.flattenError(validatedFields.error).fieldErrors,
     };
   }
 
-  // 2. Prepare data for insertion into database
   const { firstName, lastName, email, password } = validatedFields.data;
-  // e.g. Hash the user's password before storing it
   const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS);
   const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-  // 3. Insert the user into the database or call an Auth Library's API
-  const data = await db
-    .insert(users)
+  const [user] = await db
+    .insert(Users)
     .values({
       firstName,
       lastName,
       email,
       password: hashedPassword,
     })
-    .returning({ id: users.id });
-
-  const user = data[0];
+    .returning({ id: Users.id });
 
   if (!user) {
     return {
@@ -56,20 +50,16 @@ export async function register(state: FormState, formData: FormData) {
     };
   }
 
-  // Current steps:
-  // 4. Create user session
   await createSession(user.id);
-  // 5. Redirect user
   redirect("/feed");
 }
 
-export async function logout() {
+export async function logoutAction() {
   await deleteSession();
   redirect("/login");
 }
 
-export async function login(state: LoginState, formData: FormData) {
-  // Validate user credentials
+export async function loginAction(state: LoginState, formData: FormData) {
   const validatedFields = LoginFormSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
@@ -83,8 +73,13 @@ export async function login(state: LoginState, formData: FormData) {
 
   const { email, password } = validatedFields.data;
 
-  // 1. Find user by email
-  const user = await db.select().from(users).where(eq(users.email, email));
+  const [user] = await db
+    .select({
+      id: Users.id,
+      password: Users.password,
+    })
+    .from(Users)
+    .where(eq(Users.email, email));
 
   if (!user) {
     return {
@@ -92,8 +87,7 @@ export async function login(state: LoginState, formData: FormData) {
     };
   }
 
-  // 2. Compare hashed password
-  const isValid = await bcrypt.compare(password, user[0].password);
+  const isValid = await bcrypt.compare(password, user.password);
 
   if (!isValid) {
     return {
@@ -101,9 +95,21 @@ export async function login(state: LoginState, formData: FormData) {
     };
   }
 
-  // 3. Create session
-  await createSession(user[0].id);
+  await createSession(user.id);
 
-  // 4. Redirect to feed
   redirect("/feed");
+}
+
+export async function getAuthUserFullName() {
+  const session = await verifySession();
+  if (!session?.userId) throw new Error("Not authenticated");
+
+  const [user] = await db
+    .select({
+      fullName: sql<string>`concat(${Users.firstName}, ' ', ${Users.lastName})`,
+    })
+    .from(Users)
+    .where(eq(Users.id, session.userId));
+
+  return user.fullName;
 }

@@ -5,7 +5,12 @@ import { decrypt } from "@/app/lib/session";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 
-export const verifySession = cache(async () => {
+type VerifySessionReturn = {
+  isAuth: true;
+  userId: number;
+};
+
+export const verifySession = cache(async (): Promise<VerifySessionReturn> => {
   const cookie = (await cookies()).get("session")?.value;
   const session = await decrypt(cookie);
 
